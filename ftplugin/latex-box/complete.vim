@@ -164,14 +164,23 @@ endfunction
 
 let s:bstfile = expand('<sfile>:p:h') . '/vimcomplete'
 
-function! LatexBox_BibSearch(regexp)
+function! LatexBox_PurgeBbl()
 
-	" find bib data
-    let bibdata = s:FindBibData()
-    if bibdata == ''
-        echomsg 'error: no \bibliography{...} command found'
-        return
-    endif
+	let tmpbase = LatexBox_GetTexRoot() . '/_LatexBox_BibComplete'
+    let auxfile = tmpbase . '.aux'
+    let bblfile = tmpbase . '.bbl'
+    let blgfile = tmpbase . '.blg'
+
+	call delete(auxfile)
+	call delete(bblfile)
+	call delete(blgfile)
+
+endfunction
+
+
+function! LatexBox_BibSearch(regexp, ...)
+
+	let old_dir = getcwd()
 
     " write temporary aux file
 	let tmpbase = LatexBox_GetTexRoot() . '/_LatexBox_BibComplete'
@@ -179,10 +188,27 @@ function! LatexBox_BibSearch(regexp)
     let bblfile = tmpbase . '.bbl'
     let blgfile = tmpbase . '.blg'
 
-    call writefile(['\citation{*}', '\bibstyle{' . s:bstfile . '}', '\bibdata{' . bibdata . '}'], auxfile)
+	if a:0 || !filereadable(bblfile)
 
-    silent execute '! cd ' shellescape(LatexBox_GetTexRoot()) .
-				\ ' ; bibtex -terse ' . fnamemodify(auxfile, ':t') . ' >/dev/null'
+		call delete(auxfile)
+		call delete(bblfile)
+		call delete(blgfile)
+
+		" find bib data
+		let bibdata = s:FindBibData()
+		if bibdata == ''
+			echomsg 'error: no \bibliography{...} command found'
+			return
+		endif
+
+		call writefile(['\citation{*}', 
+					\'\bibstyle{' . s:bstfile . '}',
+					\'\bibdata{' . bibdata . '}'], auxfile)
+		execute 'lcd ' . fnameescape(LatexBox_GetTexRoot())
+
+		let bibout = s:system('bibtex -terse ' . fnamemodify(auxfile, ':t'))
+
+	endif
 
     let res = []
     let curentry = ''
@@ -197,9 +223,7 @@ function! LatexBox_BibSearch(regexp)
 		endif
     endfor
 
-	call delete(auxfile)
-	call delete(bblfile)
-	call delete(blgfile)
+	execute 'lcd ' . fnameescape(old_dir)
 
 	return res
 endfunction

@@ -105,9 +105,20 @@ endfunction
 function! LatexBox_kpsewhich(file)
 	let old_dir = getcwd()
 	execute 'lcd ' . fnameescape(LatexBox_GetTexRoot())
-	redir => out
-	silent execute '!kpsewhich ' . a:file
-	redir END
+
+" 	redir => out
+" 	silent execute '!kpsewhich ' . a:file
+" 	redir END
+
+	let out = s:system("kpsewhich " . a:file)
+	" echo type(out)
+	" echo out
+
+	if type(out) == type([])
+		let outlist = out
+		unlet out
+		let out = join(outlist,'\r')
+	endif
 
 	let out = split(out, "\<NL>")[-1]
 	let out = substitute(out, '\r', '', 'g')
@@ -417,5 +428,13 @@ vmap <silent> <Plug>LatexEnvWrapSelection	:<c-u>call <SID>PromptEnvWrapSelection
 vmap <silent> <Plug>LatexEnvWrapFmtSelection	:<c-u>call <SID>PromptEnvWrapSelection(1)<CR>
 nmap <silent> <Plug>LatexChangeEnv			:call <SID>ChangeEnvPrompt()<CR>
 " }}}
+
+fun s:system(cmd)
+	if exists("*xolox#shell#execute")
+		return xolox#shell#execute(a:cmd,1)
+	else
+		return system(a:cmd)
+	endif
+endf
 
 " vim:fdm=marker:ff=unix:noet:ts=4:sw=4

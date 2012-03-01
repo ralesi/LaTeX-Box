@@ -146,8 +146,8 @@ function! s:FindBibData(...)
 	let bibdata_list = []
 
 	let bibdata_list +=
-				\ map(filter(copy(lines), 'v:val =~ ''\C\\bibliography\s*{[^}]\+}'''),
-				\ 'matchstr(v:val, ''\C\\bibliography\s*{\zs[^}]\+\ze}'')')
+				\ map(filter(copy(lines), 'v:val =~ ''^\C\\bibliography\s*{[^}]\+}'''),
+				\ 'matchstr(v:val, ''^\C\\bibliography\s*{\zs[^}]\+\ze}'')')
 
 	let bibdata_list +=
 				\ map(filter(copy(lines), 'v:val =~ ''\C\\\%(input\|include\)\s*{[^}]\+}'''),
@@ -157,7 +157,7 @@ function! s:FindBibData(...)
 				\ map(filter(copy(lines), 'v:val =~ ''\C\\\%(input\|include\)\s\+\S\+'''),
 				\ 's:FindBibData(LatexBox_kpsewhich(matchstr(v:val, ''\C\\\%(input\|include\)\s\+\zs\S\+\ze'')))')
 
-	let bibdata = join(bibdata_list, ',')
+	let bibdata = join(filter(bibdata_list,'!empty(v:val)'), ',')
 
 	return bibdata
 endfunction

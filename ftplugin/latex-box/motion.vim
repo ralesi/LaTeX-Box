@@ -239,7 +239,7 @@ function! s:ConvertBack(line)
         let line = substitute(line, "\\\\IeC\s*{\\\\`u}", 'ù', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\^u}", 'û', 'g')
 
-        let line = substitute(line, "\\\\IeC\s*{\\\\'A}", 'Á', 'g')
+        let line = substitute(line, "\\\\IeC\s*{\\\\'A}", '�?', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\`A}", 'À', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\^A}", 'À', 'g')
 
@@ -247,7 +247,7 @@ function! s:ConvertBack(line)
         let line = substitute(line, "\\\\IeC\s*{\\\\`E}", 'È', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\^E}", 'Ê', 'g')
 
-        let line = substitute(line, "\\\\IeC\s*{\\\\'I}", 'Í', 'g')
+        let line = substitute(line, "\\\\IeC\s*{\\\\'I}", '�?', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\`I}", 'Î', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\^I}", 'Ì', 'g')
 
@@ -268,6 +268,7 @@ function! s:ReadTOC(auxfile)
 	let toc = []
 
 	let prefix = fnamemodify(a:auxfile, ':p:h')
+	let texfile = fnamemodify(a:auxfile, ':p:r') . '.tex'
 
 	for line in readfile(a:auxfile)
 
@@ -323,7 +324,8 @@ function! s:ReadTOC(auxfile)
 		let text = substitute(text, '^{\+\|}\+$', '', 'g')
 
 		" add TOC entry
-		call add(toc, {'file': bufname('%'),
+
+		call add(toc, {'file': texfile,
 					\ 'level': level, 'number': secnum, 'text': text, 'page': page})
 	endfor
 

@@ -239,7 +239,7 @@ function! s:ConvertBack(line)
         let line = substitute(line, "\\\\IeC\s*{\\\\`u}", 'ù', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\^u}", 'û', 'g')
 
-        let line = substitute(line, "\\\\IeC\s*{\\\\'A}", '�?', 'g')
+        let line = substitute(line, "\\\\IeC\s*{\\\\'A}", '�', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\`A}", 'À', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\^A}", 'À', 'g')
 
@@ -247,7 +247,7 @@ function! s:ConvertBack(line)
         let line = substitute(line, "\\\\IeC\s*{\\\\`E}", 'È', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\^E}", 'Ê', 'g')
 
-        let line = substitute(line, "\\\\IeC\s*{\\\\'I}", '�?', 'g')
+        let line = substitute(line, "\\\\IeC\s*{\\\\'I}", '�', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\`I}", 'Î', 'g')
         let line = substitute(line, "\\\\IeC\s*{\\\\^I}", 'Ì', 'g')
 
@@ -349,7 +349,16 @@ function! LatexBox_TOC()
 	" find closest section in current buffer
 	let closest_index = s:FindClosestSection(toc)
 
-	execute g:LatexBox_split_width . 'vnew LaTeX\ TOC'
+	let g:LatexBox_split_right = 0
+
+	if g:LatexBox_split_right == 1
+		let split_on = 'botright'
+	else
+		let split_on = 'topleft'
+	endif
+
+
+	execute split_on . g:LatexBox_split_width . 'vnew LaTeX\ TOC'
 	setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap cursorline nonumber
 
 	for entry in toc

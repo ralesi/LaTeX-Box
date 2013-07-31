@@ -2,10 +2,14 @@
 
 " Settings {{{
 
+function s:running_windows()
+	return has("win32") || has("win64")
+endfunction
+
 " Compilation {{{
 
 " g:vim_program {{{
-if !exists('g:vim_program')
+if !exists('g:vim_program') && !s:running_windows()
 
 	if match(&shell, '/bash$') >= 0
 		let ppid = '$PPID'
@@ -170,16 +174,18 @@ endfunction
 
 " View Output {{{
 function! LatexBox_View()
+	let _ssl = &ssl
+	let &ssl = 0
 	let outfile = LatexBox_GetOutputFile()
 	if !filereadable(outfile)
 		echomsg fnamemodify(outfile, ':.') . ' is not readable'
 		return
 	endif
-	let cmd = '!' . g:LatexBox_viewer . ' ' . shellescape(outfile) . ' >&/dev/null &'
-	silent execute cmd
+	call s:system(g:LatexBox_viewer . ' ' . shellescape(outfile))
 	if !has("gui_running")
 		redraw!
 	endif
+	let &ssl = _ssl
 endfunction
 
 command! LatexView			call LatexBox_View()
@@ -307,5 +313,14 @@ function! LatexBox_TreeToTex(tree)
 	endif
 endfunction
 " }}}
+
+fun s:system(cmd)
+	if exists("*xolox#shell#execute")
+		return xolox#shell#execute(a:cmd,1)
+	else
+		return system(a:cmd)
+	endif
+endf
+
 
 " vim:fdm=marker:ff=unix:noet:ts=4:sw=4

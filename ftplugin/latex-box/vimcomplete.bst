@@ -1,5 +1,6 @@
 ENTRY
-  { address author booktitle chapter doi edition editor eid howpublished institution isbn issn journal key month note number organization pages publisher school series title type volume year }
+% month isn't recognized as mar, apr
+  { address author booktitle chapter doi edition editor eid howpublished institution isbn issn journal key note number organization pages publisher school series title type volume year }
   {}
   { label }
 STRINGS { s t}

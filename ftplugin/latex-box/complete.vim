@@ -177,6 +177,7 @@ function! LatexBox_PurgeBbl()
 
 endfunction
 
+command! LatexBibPurge :call LatexBox_PurgeBbl()<cr>
 
 function! LatexBox_BibSearch(regexp, ...)
 
@@ -225,6 +226,9 @@ function! LatexBox_BibSearch(regexp, ...)
 
 	execute 'lcd ' . fnameescape(old_dir)
 
+	if empty(res) && !a:0
+		call LatexBox_BibSearch(a:regexp, 1)
+	endif
 	return res
 endfunction
 " }}}
@@ -277,7 +281,7 @@ function! s:CompleteLabels(regex, ...)
 	" search for the target equation number
 	for line in filter(readfile(file), 'v:val =~ ''^\\newlabel{\|^\\@input{''')
 
-		echomsg "matching line: " . line
+		" echomsg "matching line: " . line
 
 		" search for matching label
 		let matches = matchlist(line, '^\\newlabel{\(' . a:regex . '[^}]*\)}{{\([^}]*\)}{\([^}]*\)}.*}')
@@ -299,6 +303,11 @@ function! s:CompleteLabels(regex, ...)
 
 		if !empty(matches)
 
+			" don't count subfig entries
+			if matches[1] =~ 'sub'
+				continue
+			endif
+
 			let entry = {'word': matches[1], 'menu': '(' . matches[2] . ') [p.' . matches[3] . ']'}
 
 			if g:LatexBox_completion_close_braces && !s:NextCharsMatch('^\s*[,}]')
@@ -317,6 +326,7 @@ function! s:CompleteLabels(regex, ...)
 			call extend(suggestions, s:CompleteLabels(a:regex, included_file))
 		endif
 	endfor
+
 
 	return suggestions
 
